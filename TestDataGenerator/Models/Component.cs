@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TestDataGenerator.Models
+﻿namespace TestDataGenerator.Models
 {
     public enum ComponentType
     {
@@ -38,8 +32,6 @@ namespace TestDataGenerator.Models
         public int Id { get; set; }
         public string TitleUa { get; set; }
         public string TitleEn { get; set; }
-        public string? DescriptionUa { get; set; }
-        public string? DescriptionEn { get; set; }
         public int LectionHours { get; set; }
         public int PracticHours { get; set; }
         public int LabourHours { get; set; }
@@ -53,7 +45,6 @@ namespace TestDataGenerator.Models
         public ComponentType ComponentType { get; set; }
 
         public Department Department { get; set; }
-        public ICollection<Employee> Employees { get; set; }
         public ICollection<Subject> Subjects { get; set; }
     }
 }

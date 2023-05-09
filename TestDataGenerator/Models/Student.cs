@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TestDataGenerator.Models
+﻿namespace TestDataGenerator.Models
 {
     public class Student
     {
@@ -17,7 +11,5 @@ namespace TestDataGenerator.Models
         public int EduFinanceId { get; set; }
         public int? GroupId { get; set; }
         public int Course { get; set; }
-        public Person Person { get; set; }
-        public Group? Group { get; set; }
     }
 }

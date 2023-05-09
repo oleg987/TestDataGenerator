@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TestDataGenerator.Models
+﻿namespace TestDataGenerator.Models
 {
     public enum SubjectTypes
     {
@@ -29,8 +22,6 @@ namespace TestDataGenerator.Models
         public SubjectTypes SubjectType { get; set; }
 
         public Component Component { get; set; }
-        public IEnumerable<MarkReport> MarkReports { get; set; }
         public StudyPlan StudyPlan { get; set; }
-        public ICollection<EmployeeSubject> EmployeeSubjects { get; set; }
     }
 }
