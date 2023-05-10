@@ -46,7 +46,7 @@ namespace TestDataGenerator.Generators
                         EduFinanceId = Random.Shared.Next(1, 3),
                         GroupId = group.Key,
                         Course = 0
-                    };
+                    };                    
 
                     students.Add(student);
                 }

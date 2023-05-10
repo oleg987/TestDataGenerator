@@ -23,6 +23,8 @@ namespace TestDataGenerator
             //var studentGenerator = new StudentGenerator();
             //studentGenerator.Generate(6000);
 
+
+            // Generate 1000 components.
             var titles = GetComponentTitles();
         }
 
