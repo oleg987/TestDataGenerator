@@ -1,32 +1,95 @@
 ﻿using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 using System.Text.Json;
+using TestDataGenerator.Generators;
 
 namespace TestDataGenerator
 {
+
     internal class Program
     {
+
+
+        private const string ALLOWED_CHARS = "QWERTYUIOPASDFGHJKLZXCVBNM";
+
         static void Main(string[] args)
         {
-            var persons = GeneratePersons(6000);
+            //var persons = GeneratePersons(6000);
 
-            File.WriteAllText("person_ids.txt", JsonSerializer.Serialize(persons));
+            //var groups = GenerateGroups(6000);
+
+            //var studentGenerator = new StudentGenerator();
+            //studentGenerator.Generate(6000);
+
+            var titles = GetComponentTitles();
         }
 
-        static List<int> GenerateGroups(int studentsCount) // what we need to return???
+        static List<string> GetComponentTitles()
         {
-            /*
-             * Group title pattern: LL-NNN (L - letter, N - number)
-             * Group title unique
-             * Groups count: students in group 5 - 30
-             * Student can`t be presented in more than one group
-             * All students must be with group
-             */
-            return null;
+            using var file = new FileStream("titles.txt", FileMode.Open);
+            using var reader = new StreamReader(file);
+
+            var content = reader.ReadToEnd();
+            Console.WriteLine(content);
+
+            return JsonSerializer.Deserialize<List<string>>(content) ?? new List<string>();
         }
 
-        static List<int> GeneratePersons(int count)
+        /*
+         * Group title pattern: LL-NNN (L - letter, N - number) !
+         * Group title unique
+         * Groups count: students in group 5 - 30
+         * Student can`t be presented in more than one group
+         * All students must be with group
+         */
+        static Dictionary<int, int> GenerateGroups(int studentsCount) // what we need to return??? !
+        {
+            var titles = new HashSet<string>();
+
+            var groups = new List<Models.Group>();
+
+            var dict = new Dictionary<Models.Group, int>();
+
+            var studentsInCurrentGroup = Random.Shared.Next(5, 31);
+
+            var remainigStudents = studentsCount - studentsInCurrentGroup;
+
+            if (remainigStudents >= 0)
+            {
+                studentsCount = remainigStudents;
+            }
+            else
+            {
+                studentsInCurrentGroup = studentsCount;
+            }
+
+            string? title = null;
+
+            while (true)
+            {
+                title = GenerateGroupTitle();
+
+                if (titles.Add(title)) break;
+            }
+
+            var group = new Models.Group() { Title = title };
+            groups.Add(group);            
+
+            dict.Add(group, studentsInCurrentGroup);
+
+            // save to DB.
+
+            return dict.ToDictionary(k => k.Key.Id, v => v.Value);
+        }
+
+        static string GenerateGroupTitle()
+        {
+            return $"{ALLOWED_CHARS[Random.Shared.Next(ALLOWED_CHARS.Length)]}{ALLOWED_CHARS[Random.Shared.Next(ALLOWED_CHARS.Length)]}-{Random.Shared.Next(100, 1000)}";
+        }
+
+        static int[] GeneratePersons(int count)
         {
             using var ctx = new IsDbContext();
 
@@ -53,7 +116,7 @@ namespace TestDataGenerator
 
             ctx.BulkSaveChanges();
 
-            return persons.Select(p => p.Id).ToList();
+            return persons.Select(p => p.Id).ToArray();
         }
     }
 }

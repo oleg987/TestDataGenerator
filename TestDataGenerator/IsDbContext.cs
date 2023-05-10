@@ -9,7 +9,6 @@ namespace TestDataGenerator
         public DbSet<Person> Persons { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<StudyPlan> StudyPlans { get; set; }
-        public DbSet<StudyFlow> StudyFlow { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Country> Countries { get; set; }
@@ -21,6 +20,9 @@ namespace TestDataGenerator
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.LogTo(Console.WriteLine);
+            optionsBuilder.EnableDetailedErrors();
+            optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.UseNpgsql("Server=localhost;Port=8888;Database=is_data;Username=postgres;Password=123456");
             base.OnConfiguring(optionsBuilder);
         }
@@ -32,6 +34,21 @@ namespace TestDataGenerator
 
             modelBuilder.Entity<Person>()
                 .Property(e => e.Birthday)
+                .HasColumnType("date");
+
+            modelBuilder.Entity<Student>()
+                .HasKey(e => e.Id);
+
+            modelBuilder.Entity<Student>()
+                .Property(e => e.Id)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<Student>()
+                .Property(e => e.Begin)
+                .HasColumnType("date");
+
+            modelBuilder.Entity<Student>()
+                .Property(e => e.End)
                 .HasColumnType("date");
 
             base.OnModelCreating(modelBuilder);
