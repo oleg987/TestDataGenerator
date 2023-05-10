@@ -24,7 +24,8 @@ namespace TestDataGenerator
             //studentGenerator.Generate(6000);
 
 
-            // Generate 1000 components.
+            // Generate 1000 components. 
+            // Unique: set of (Title, Hours, GradingType, Cw, RGR)
             var titles = GetComponentTitles();
         }
 
