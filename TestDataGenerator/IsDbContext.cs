@@ -23,7 +23,7 @@ namespace TestDataGenerator
             optionsBuilder.LogTo(Console.WriteLine);
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.EnableSensitiveDataLogging();
-            optionsBuilder.UseNpgsql("Server=localhost;Port=8888;Database=is_data;Username=postgres;Password=123456");
+            optionsBuilder.UseNpgsql("Server=localhost;Port=5432;Database=data;Username=postgres;Password=postgres");
             base.OnConfiguring(optionsBuilder);
         }
 

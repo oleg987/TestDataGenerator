@@ -27,7 +27,7 @@
         CW
     }
 
-    public class Component
+    public class Component : IEquatable<Component>
     {
         public int Id { get; set; }
         public string TitleUa { get; set; }
@@ -46,5 +46,22 @@
 
         public Department Department { get; set; }
         public ICollection<Subject> Subjects { get; set; }
+
+        public bool Equals(Component? other)
+        {
+            return other is not null && other.TitleUa == TitleUa
+                                    && other.LectionHours == LectionHours
+                                    && other.PracticHours == PracticHours
+                                    && other.LabourHours == LabourHours
+                                    && other.SelfHours == SelfHours
+                                    && other.RGR == RGR
+                                    && other.CW == CW
+                                    && other.GradingType == GradingType;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(TitleUa, LectionHours, PracticHours, LabourHours, SelfHours, RGR, CW, GradingType);
+        }
     }
 }

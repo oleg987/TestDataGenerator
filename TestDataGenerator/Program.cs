@@ -2,16 +2,14 @@
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using System;
 using System.Text.Json;
 using TestDataGenerator.Generators;
 
 namespace TestDataGenerator
 {
-
     internal class Program
     {
-
-
         private const string ALLOWED_CHARS = "QWERTYUIOPASDFGHJKLZXCVBNM";
 
         static void Main(string[] args)
@@ -23,10 +21,21 @@ namespace TestDataGenerator
             //var studentGenerator = new StudentGenerator();
             //studentGenerator.Generate(6000);
 
-
             // Generate 1000 components. 
             // Unique: set of (Title, Hours, GradingType, Cw, RGR)
-            var titles = GetComponentTitles();
+            //var componentsGenerator = new ComponentGenerator();
+            //var components = componentsGenerator.Generate(1000);
+
+            // Generate subjects
+            //var subjectsGenerator = new SubjectGenerator();
+            //subjectsGenerator.Generate();
+
+            // Generate MarkReports
+            var markReportGenerator = new MarkReportGenerator();
+            markReportGenerator.Generate();
+
+
+            // Найти кафедры без сотрудников и добавить туда хотя бы одного.
         }
 
         static List<string> GetComponentTitles()
