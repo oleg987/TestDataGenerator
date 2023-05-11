@@ -8,5 +8,7 @@
         public int SubjectId { get; set; }
         public int EmployeeId { get; set; }
         public string? ReportCode { get; set; }
+
+        public Group Group { get; set; }
     }
 }

@@ -1,10 +1,6 @@
 ﻿using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
@@ -19,7 +15,7 @@ namespace TestDataGenerator.Generators
 
         public void Generate()
         {
-            var markReports = new List<Models.MarkReport>();
+            var markReports = new List<MarkReport>();
 
             var studyPlans = _ctx.StudyPlans
                 .AsNoTracking()
@@ -41,15 +37,13 @@ namespace TestDataGenerator.Generators
                 })
                 .ToList();
 
-            Console.WriteLine(studyPlans.SelectMany(s => s.Groups).Count() * studyPlans.SelectMany(s => s.Subjects).Count());
-
             foreach (var studyPlan in studyPlans)
             {
-                foreach(var group in studyPlan.Groups)
+                foreach (var group in studyPlan.Groups)
                 {
                     foreach (var subjects in studyPlan.Subjects)
                     {
-                        var markReport = new Models.MarkReport
+                        var markReport = new MarkReport
                         {
                             Date = new DateTime(Random.Shared.Next(2010, 2024), Random.Shared.Next(1, 13), Random.Shared.Next(1, 29)),
                             GroupId = group,

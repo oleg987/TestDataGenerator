@@ -1,10 +1,6 @@
 ﻿using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
@@ -17,14 +13,13 @@ namespace TestDataGenerator.Generators
             _ctx = new IsDbContext();
         }
 
-
-
         public void Generate()
         {
-            var subjects = new List<Models.Subject>();
+            var subjects = new List<Subject>();
 
             var studyPlanIds = _ctx.StudyPlans
                 .AsNoTracking()
+                .Where(s => s.Groups.Any()) // Seed only plans with groups.
                 .Select(s => s.Id)
                 .ToList();
 
@@ -42,7 +37,7 @@ namespace TestDataGenerator.Generators
                 {
                     var semestersCount = 0;
 
-                    if (component.CW != Models.CwTypes.None && component.RGR != Models.RgrTypes.None)
+                    if (component.CW != CwTypes.None && component.RGR != RgrTypes.None)
                     {
                         semestersCount = Random.Shared.Next(2, 9);
                     }
@@ -59,13 +54,13 @@ namespace TestDataGenerator.Generators
 
                     foreach (var semester in semesterNums)
                     {
-                        var subject = new Models.Subject
+                        var subject = new Subject
                         {
                             ComponentId = component.Id,
                             Semester = semester,
                             GradingType = component.GradingType == Models.GradingTypes.Offset ? Models.GradingTypes.Offset : (Models.GradingTypes)Random.Shared.Next(1, 3),
                             StudyPlanId = studyPlanId,
-                            SubjectType = (Models.SubjectTypes)Random.Shared.Next(1, 3),
+                            SubjectType = (SubjectTypes)Random.Shared.Next(1, 3),
                             LectionHours = hours[semester][0],
                             PracticHours = hours[semester][1],
                             LabourHours = hours[semester][2],
@@ -76,21 +71,21 @@ namespace TestDataGenerator.Generators
                     }
 
                     // check exam
-                    if (component.GradingType == Models.GradingTypes.Exam && !componentSubjects.Any(s => s.GradingType == Models.GradingTypes.Exam))
+                    if (component.GradingType == GradingTypes.Exam && !componentSubjects.Any(s => s.GradingType == GradingTypes.Exam))
                     {
-                        componentSubjects[Random.Shared.Next(componentSubjects.Count)].GradingType = Models.GradingTypes.Exam;
+                        componentSubjects[Random.Shared.Next(componentSubjects.Count)].GradingType = GradingTypes.Exam;
                     }
 
                     // check CW
-                    if (component.CW != Models.CwTypes.None)
+                    if (component.CW != CwTypes.None)
                     {
-                        componentSubjects[Random.Shared.Next(componentSubjects.Count)].CW = Models.CwTypes.CW;
+                        componentSubjects[Random.Shared.Next(componentSubjects.Count)].CW = CwTypes.CW;
                     }
 
                     // check RGR
-                    if (component.RGR != Models.RgrTypes.None)
+                    if (component.RGR != RgrTypes.None)
                     {
-                        componentSubjects.Where(c => c.CW != Models.CwTypes.CW).Last().RGR = component.RGR;
+                        componentSubjects.Where(c => c.CW != CwTypes.CW).Last().RGR = component.RGR;
                     }
 
                     subjects.AddRange(componentSubjects);
@@ -106,7 +101,7 @@ namespace TestDataGenerator.Generators
         {
             var semesterNums = new HashSet<int>(semestersCount);
 
-            while(semesterNums.Count < semestersCount) 
+            while (semesterNums.Count < semestersCount)
             {
                 semesterNums.Add(Random.Shared.Next(1, 9));
             }
@@ -114,7 +109,7 @@ namespace TestDataGenerator.Generators
             return semesterNums;
         }
 
-        private static Dictionary<int, List<int>> GenerateHours(Models.Component component, List<int> semesterNums)
+        private static Dictionary<int, List<int>> GenerateHours(Component component, List<int> semesterNums)
         {
             var result = new Dictionary<int, List<int>>(semesterNums.Count);
 
@@ -151,11 +146,11 @@ namespace TestDataGenerator.Generators
             return result.Any(r => r.Value.Sum() == 0) ? GenerateHours(component, semesterNums) : result;
         }
 
-        private static HashSet<Models.Component> GetRandomUniqueNameComponents(int componentsCount, List<Models.Component> components)
+        private static HashSet<Component> GetRandomUniqueNameComponents(int componentsCount, List<Component> components)
         {
-            var result = new HashSet<Models.Component>(componentsCount, new ComponentUniqueTitleComparer());
+            var result = new HashSet<Component>(componentsCount, new ComponentUniqueTitleComparer());
 
-            while (result.Count < componentsCount) 
+            while (result.Count < componentsCount)
             {
                 var component = components[Random.Shared.Next(components.Count)];
 

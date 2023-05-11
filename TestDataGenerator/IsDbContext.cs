@@ -23,7 +23,7 @@ namespace TestDataGenerator
             optionsBuilder.LogTo(Console.WriteLine);
             optionsBuilder.EnableDetailedErrors();
             optionsBuilder.EnableSensitiveDataLogging();
-            optionsBuilder.UseNpgsql("Server=localhost;Port=5432;Database=data;Username=postgres;Password=postgres");
+            optionsBuilder.UseNpgsql("Server=localhost;Port=8888;Database=is_data;Username=postgres;Password=123456");
             base.OnConfiguring(optionsBuilder);
         }
 
@@ -49,6 +49,10 @@ namespace TestDataGenerator
 
             modelBuilder.Entity<Student>()
                 .Property(e => e.End)
+                .HasColumnType("date");
+
+            modelBuilder.Entity<MarkReport>()
+                .Property(e => e.Date)
                 .HasColumnType("date");
 
             base.OnModelCreating(modelBuilder);

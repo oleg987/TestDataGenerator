@@ -1,12 +1,6 @@
 ﻿using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Noding;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
@@ -20,9 +14,9 @@ namespace TestDataGenerator.Generators
             _ctx = new IsDbContext();
         }
 
-        public int[] Generate(int count)
+        public void Generate(int count)
         {
-            var components = new HashSet<Models.Component>(count);
+            var components = new HashSet<Component>(count);
 
             var titles = GetComponentTitles();
 
@@ -39,7 +33,7 @@ namespace TestDataGenerator.Generators
 
                 var title = titles[Random.Shared.Next(titles.Count)];
 
-                var component = new Models.Component()
+                var component = new Component()
                 {
                     TitleEn = title,
                     TitleUa = title,
@@ -62,8 +56,6 @@ namespace TestDataGenerator.Generators
             _ctx.Components.AddRange(components);
 
             _ctx.BulkSaveChanges();
-
-            return components.Select(d => d.Id).ToArray();
         }
 
         private static List<string> GetComponentTitles()

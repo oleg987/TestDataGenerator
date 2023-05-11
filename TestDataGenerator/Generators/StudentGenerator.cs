@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
@@ -20,12 +21,12 @@ namespace TestDataGenerator.Generators
 
             var groupsWithStudentCount = GenerateGroups(count);
 
-            GenerateStudents(personIds, groupsWithStudentCount);            
+            GenerateStudents(personIds, groupsWithStudentCount);
         }
 
         private void GenerateStudents(int[] personIds, Dictionary<int, int> groupsWithStudentCount)
         {
-            var students = new List<Models.Student>(personIds.Length);
+            var students = new List<Student>(personIds.Length);
 
             var currentStudent = 0;
 
@@ -35,7 +36,7 @@ namespace TestDataGenerator.Generators
             {
                 for (int i = 0; i < group.Value; i++)
                 {
-                    var student = new Models.Student
+                    var student = new Student
                     {
                         Id = ++currentStudentId,
                         PersonId = personIds[currentStudent++],
@@ -46,7 +47,7 @@ namespace TestDataGenerator.Generators
                         EduFinanceId = Random.Shared.Next(1, 3),
                         GroupId = group.Key,
                         Course = 0
-                    };                    
+                    };
 
                     students.Add(student);
                 }
@@ -60,8 +61,8 @@ namespace TestDataGenerator.Generators
         private Dictionary<int, int> GenerateGroups(int studentsCount)
         {
             var groupTitles = new HashSet<string>();
-            var groups = new List<Models.Group>();
-            var groupsWithStudentCount = new Dictionary<Models.Group, int>();
+            var groups = new List<Group>();
+            var groupsWithStudentCount = new Dictionary<Group, int>();
 
             var studyPlanIds = ctx.StudyPlans
                 .AsNoTracking()
@@ -91,7 +92,7 @@ namespace TestDataGenerator.Generators
                     if (groupTitles.Add(title)) break;
                 }
 
-                var group = new Models.Group { Title = title, StudyPlanId = studyPlanIds[Random.Shared.Next(studyPlanIds.Length)] };
+                var group = new Group { Title = title, StudyPlanId = studyPlanIds[Random.Shared.Next(studyPlanIds.Length)] };
                 groups.Add(group);
                 groupsWithStudentCount.Add(group, countOfStudentsInGroup);
             } while (studentsCount > 0);
