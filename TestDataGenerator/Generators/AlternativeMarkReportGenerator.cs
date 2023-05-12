@@ -1,20 +1,22 @@
 ﻿using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
-    public class AlternativeMarkReportGenerator
+    public class AlternativeMarkReportGenerator : GeneratorBase
     {
-        private readonly IsDbContext _ctx;
-
-        public AlternativeMarkReportGenerator()
+        public AlternativeMarkReportGenerator(string connectionString) : base(connectionString)
         {
-            _ctx = new IsDbContext();
+            
         }
 
         public void Generate()
         {
+            var sw = new Stopwatch();
+            sw.Start();
+
             var subjects = _ctx.Subjects
                 .AsNoTracking()
                 .AsSplitQuery()
@@ -28,17 +30,23 @@ namespace TestDataGenerator.Generators
                 })
                 .ToList();
 
+            sw.Stop();
+
+            Console.WriteLine($"Query {subjects.Count} subjects with groups and employees. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
+
             var reports = new List<MarkReport>();
 
             var days = (DateTime.Today - new DateTime(2010, 1, 1)).Days;
 
             foreach (var subject in subjects)
             {
-                foreach (var group in subject.Groups)
+                foreach (var group in subject.Groups) 
                 {
                     var reportsCount = Random.Shared.Next(3, 16);
 
-                    for (int i = 0; i < reportsCount; i++)
+                    for (int i = 0; i < reportsCount; i++) 
                     {
                         var report = new MarkReport
                         {
@@ -52,8 +60,17 @@ namespace TestDataGenerator.Generators
                     }
                 }
             }
+            sw.Stop();
+
+            Console.WriteLine($"Generated {reports.Count} MarkReports. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
 
             _ctx.BulkInsert(reports);
+
+            sw.Stop();
+
+            Console.WriteLine($"Inserted {reports.Count} MarkReports. Execution: {sw.ElapsedMilliseconds} ms.");
         }
     }
 }

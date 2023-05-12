@@ -1,17 +1,15 @@
 ﻿using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using System.Text.Json;
 using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
-    public class ComponentGenerator
+    public class ComponentGenerator : GeneratorBase
     {
-        private readonly IsDbContext _ctx;
-
-        public ComponentGenerator()
+        public ComponentGenerator(string connectionString) : base(connectionString)
         {
-            _ctx = new IsDbContext();
         }
 
         public void Generate(int count)
@@ -20,12 +18,21 @@ namespace TestDataGenerator.Generators
 
             var titles = GetComponentTitles();
 
+            var sw = new Stopwatch();
+            sw.Start();
+
             // Проверка на наличие сотрудников
             var departments = _ctx.Departments
                 .AsNoTracking()
                 .Where(d => d.DepartmentTypeId == 30 && d.Employees.Any())
                 .Select(d => d.Id)
                 .ToList();
+
+            sw.Stop();
+
+            Console.WriteLine($"Query {departments.Count} departments that have any employees. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
 
             while (components.Count < 1000)
             {
@@ -53,9 +60,17 @@ namespace TestDataGenerator.Generators
                 components.Add(component);
             }
 
-            _ctx.Components.AddRange(components);
+            sw.Stop();
 
-            _ctx.BulkSaveChanges();
+            Console.WriteLine($"Generated {components.Count} Components. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
+
+            _ctx.BulkInsert(components.ToList());
+
+            sw.Stop();
+
+            Console.WriteLine($"Inserted {components.Count} Components. Execution: {sw.ElapsedMilliseconds} ms.");
         }
 
         private static List<string> GetComponentTitles()

@@ -1,27 +1,43 @@
 ﻿using Bogus;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
-    public class StudentGenerator
+    public class StudentGenerator : GeneratorBase
     {
         private const string ALLOWED_CHARS = "QWERTYUIOPASDFGHJKLZXCVBNM";
-        private readonly IsDbContext ctx;
-
-        public StudentGenerator()
+        public StudentGenerator(string connectionString) : base(connectionString)
         {
-            ctx = new IsDbContext();
+
         }
 
         public void Generate(int count)
         {
+            var sw = new Stopwatch();
+
+            sw.Start();
+
             var personIds = GeneratePersons(count);
+
+            sw.Stop();
+
+            Console.WriteLine($"Inserted {count} persons. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
 
             var groupsWithStudentCount = GenerateGroups(count);
 
+            sw.Stop();
+
+            Console.WriteLine($"Inserted {groupsWithStudentCount.Count} groups. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
             GenerateStudents(personIds, groupsWithStudentCount);
+            sw.Stop();
+            Console.WriteLine($"Inserted {count} students. Execution: {sw.ElapsedMilliseconds} ms.");
         }
 
         private void GenerateStudents(int[] personIds, Dictionary<int, int> groupsWithStudentCount)
@@ -30,7 +46,7 @@ namespace TestDataGenerator.Generators
 
             var currentStudent = 0;
 
-            var currentStudentId = ctx.Students.Any() ? ctx.Students.Max(s => s.Id) : 0;
+            var currentStudentId = _ctx.Students.Any() ? _ctx.Students.Max(s => s.Id) : 0;
 
             foreach (var group in groupsWithStudentCount)
             {
@@ -53,9 +69,7 @@ namespace TestDataGenerator.Generators
                 }
             }
 
-            ctx.Students.AddRange(students);
-
-            ctx.BulkSaveChanges();
+            _ctx.BulkInsert(students);
         }
 
         private Dictionary<int, int> GenerateGroups(int studentsCount)
@@ -64,7 +78,7 @@ namespace TestDataGenerator.Generators
             var groups = new List<Group>();
             var groupsWithStudentCount = new Dictionary<Group, int>();
 
-            var studyPlanIds = ctx.StudyPlans
+            var studyPlanIds = _ctx.StudyPlans
                 .AsNoTracking()
                 .Select(s => s.Id)
                 .ToArray();
@@ -97,9 +111,9 @@ namespace TestDataGenerator.Generators
                 groupsWithStudentCount.Add(group, countOfStudentsInGroup);
             } while (studentsCount > 0);
 
-            ctx.Groups.AddRange(groups);
+            _ctx.Groups.AddRange(groups);
 
-            ctx.BulkSaveChanges();
+            _ctx.BulkSaveChanges();
 
             return groupsWithStudentCount.ToDictionary(k => k.Key.Id, v => v.Value);
         }
@@ -110,7 +124,7 @@ namespace TestDataGenerator.Generators
         }
         private int[] GeneratePersons(int count)
         {
-            var countries = ctx.Countries
+            var countries = _ctx.Countries
                 .AsNoTracking()
                 .Where(c => c.Id > 0)
                 .Select(c => c.Id)
@@ -129,9 +143,9 @@ namespace TestDataGenerator.Generators
 
             var persons = fakePersons.Generate(count);
 
-            ctx.Persons.AddRange(persons);
+            _ctx.Persons.AddRange(persons);
 
-            ctx.BulkSaveChanges();
+            _ctx.BulkSaveChanges();
 
             return persons.Select(p => p.Id).ToArray();
         }

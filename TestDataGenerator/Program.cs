@@ -1,4 +1,5 @@
-﻿using TestDataGenerator.Generators;
+﻿using System.Diagnostics;
+using TestDataGenerator.Generators;
 
 namespace TestDataGenerator
 {
@@ -6,24 +7,27 @@ namespace TestDataGenerator
     {
         static void Main(string[] args)
         {
-            //var studentGenerator = new StudentGenerator();
-            //studentGenerator.Generate(10000);
+            var sw = new Stopwatch();
+            sw.Start();
 
-            // Generate 1000 components. 
-            // Unique: set of (Title, Hours, GradingType, Cw, RGR)
-            //var componentsGenerator = new ComponentGenerator();
-            //componentsGenerator.Generate(1000);
+            string _connectionString = string.Empty;
 
-            //// Generate subjects
-            //var subjectsGenerator = new SubjectGenerator();
-            //subjectsGenerator.Generate();
+            using (var file = new FileStream("connection.txt", FileMode.Open))
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    _connectionString = reader.ReadToEnd().Trim();
+                }
+            }
 
-            // Generate MarkReports
-            //var markReportGenerator = new AlternativeMarkReportGenerator();
-            //markReportGenerator.Generate();
+            var facade = new GeneratorFasade(_connectionString);
+            facade.Generate();
 
-            var markGenerator = new MarkGenerator();
-            markGenerator.Generate();
+            sw.Stop();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Total generation time {sw.ElapsedMilliseconds} ms.");
+            Console.ResetColor();
+            Console.ReadLine();
         }
     }
 }

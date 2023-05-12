@@ -15,6 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="connection.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="titles.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

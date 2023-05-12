@@ -4,13 +4,10 @@ using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
-    public class MarkReportGenerator
+    public class MarkReportGenerator : GeneratorBase
     {
-        private readonly IsDbContext _ctx;
-
-        public MarkReportGenerator()
+        public MarkReportGenerator(string connectionString) : base(connectionString)
         {
-            _ctx = new IsDbContext();
         }
 
         public void Generate()

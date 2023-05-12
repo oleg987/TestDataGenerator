@@ -5,6 +5,13 @@ namespace TestDataGenerator
 {
     public class IsDbContext : DbContext
     {
+        private readonly string _connectionString;
+
+        public IsDbContext(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
         // Tables
         public DbSet<Person> Persons { get; set; }
         public DbSet<Department> Departments { get; set; }
@@ -20,10 +27,7 @@ namespace TestDataGenerator
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.LogTo(Console.WriteLine);
-            optionsBuilder.EnableDetailedErrors();
-            optionsBuilder.EnableSensitiveDataLogging();
-            optionsBuilder.UseNpgsql("Server=localhost;Port=8888;Database=is_data;Username=postgres;Password=123456");
+            optionsBuilder.UseNpgsql(_connectionString);
             base.OnConfiguring(optionsBuilder);
         }
 

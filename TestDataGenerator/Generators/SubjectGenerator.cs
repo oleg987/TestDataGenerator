@@ -1,21 +1,22 @@
 ﻿using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
-    public class SubjectGenerator
+    public class SubjectGenerator : GeneratorBase
     {
-        private readonly IsDbContext _ctx;
-
-        public SubjectGenerator()
+        public SubjectGenerator(string connectionString) : base(connectionString)
         {
-            _ctx = new IsDbContext();
         }
 
         public void Generate()
         {
             var subjects = new List<Subject>();
+
+            var sw = new Stopwatch();
+            sw.Start();
 
             var studyPlanIds = _ctx.StudyPlans
                 .AsNoTracking()
@@ -26,6 +27,12 @@ namespace TestDataGenerator.Generators
             var components = _ctx.Components
                 .AsNoTracking()
                 .ToList();
+
+            sw.Stop();
+
+            Console.WriteLine($"Query {studyPlanIds.Count} study plans and {components.Count} components. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
 
             foreach (var studyPlanId in studyPlanIds)
             {
@@ -48,7 +55,7 @@ namespace TestDataGenerator.Generators
 
                     var semesterNums = GenerateSemesterNums(semestersCount);
 
-                    var componentSubjects = new List<Models.Subject>();
+                    var componentSubjects = new List<Subject>();
 
                     var hours = GenerateHours(component, semesterNums.ToList());
 
@@ -58,7 +65,7 @@ namespace TestDataGenerator.Generators
                         {
                             ComponentId = component.Id,
                             Semester = semester,
-                            GradingType = component.GradingType == Models.GradingTypes.Offset ? Models.GradingTypes.Offset : (Models.GradingTypes)Random.Shared.Next(1, 3),
+                            GradingType = component.GradingType == GradingTypes.Offset ? GradingTypes.Offset : (GradingTypes)Random.Shared.Next(1, 3),
                             StudyPlanId = studyPlanId,
                             SubjectType = (SubjectTypes)Random.Shared.Next(1, 3),
                             LectionHours = hours[semester][0],
@@ -92,9 +99,17 @@ namespace TestDataGenerator.Generators
                 }
             }
 
-            _ctx.Subjects.AddRange(subjects);
+            sw.Stop();
 
-            _ctx.BulkSaveChanges();
+            Console.WriteLine($"Generated {subjects.Count} subjects. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
+
+            _ctx.BulkInsert(subjects);
+
+            sw.Stop();
+
+            Console.WriteLine($"Inserted {subjects.Count} subjects. Execution: {sw.ElapsedMilliseconds} ms.");
         }
 
         private static HashSet<int> GenerateSemesterNums(int semestersCount)

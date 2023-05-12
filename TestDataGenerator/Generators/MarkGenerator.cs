@@ -1,25 +1,22 @@
 ﻿using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
 {
-    public class MarkGenerator
+    public class MarkGenerator : GeneratorBase
     {
-        private readonly IsDbContext _ctx;
-
-        public MarkGenerator()
+        public MarkGenerator(string connectionString) : base(connectionString)
         {
-            _ctx = new IsDbContext();
+
         }
 
         public void Generate()
         {
+            var sw = new Stopwatch();
+            sw.Start();
+
             var markReports = _ctx.MarkReport
                 .AsSplitQuery()
                 .AsNoTracking()
@@ -30,6 +27,12 @@ namespace TestDataGenerator.Generators
                     Students = m.Group.Students.Select(s => s.Id).ToList()
                 })
                 .ToList();
+
+            sw.Stop();
+
+            Console.WriteLine($"Query {markReports.Count} mark reports with students. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
 
             var marks = new List<Mark>();
 
@@ -62,6 +65,10 @@ namespace TestDataGenerator.Generators
             }
 
             _ctx.BulkInsert(marks);
+
+            sw.Stop();
+
+            Console.WriteLine($"Generated and inserted {counter} marks. Execution: {sw.ElapsedMilliseconds} ms.");
         }
 
         private static HashSet<int> GetRandomStudents(List<int> students, int marksInReport)
