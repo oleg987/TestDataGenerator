@@ -20,8 +20,10 @@ namespace TestDataGenerator
                 }
             }
 
-            var facade = new GeneratorFasade(_connectionString);
-            facade.Generate();
+            using (var markReportGenerator = new MarkReportGenerator(_connectionString))
+            {
+                markReportGenerator.Generate();
+            }
 
             sw.Stop();
             Console.ForegroundColor = ConsoleColor.Green;

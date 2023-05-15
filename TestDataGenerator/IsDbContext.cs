@@ -27,6 +27,9 @@ namespace TestDataGenerator
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.LogTo(Console.WriteLine);
+            optionsBuilder.EnableDetailedErrors();
+            optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.UseNpgsql(_connectionString);
             base.OnConfiguring(optionsBuilder);
         }

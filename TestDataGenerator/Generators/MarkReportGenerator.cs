@@ -1,5 +1,6 @@
 ﻿using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using TestDataGenerator.Models;
 
 namespace TestDataGenerator.Generators
@@ -8,60 +9,74 @@ namespace TestDataGenerator.Generators
     {
         public MarkReportGenerator(string connectionString) : base(connectionString)
         {
+            
         }
 
         public void Generate()
         {
-            var markReports = new List<MarkReport>();
+            var sw = new Stopwatch();
+            sw.Start();
 
-            var studyPlans = _ctx.StudyPlans
-                .AsNoTracking()
+            var subjects = _ctx.Subjects
                 .AsSplitQuery()
-                .Where(s => s.Groups.Any())
-                .Include(s => s.Groups)
-                .Include(s => s.Subjects)
-                    .ThenInclude(s => s.Component)
-                        .ThenInclude(c => c.Department)
-                            .ThenInclude(d => d.Employees)
                 .Select(s => new
                 {
-                    Groups = s.Groups.Select(g => g.Id),
-                    Subjects = s.Subjects.Select(sub => new
-                    {
-                        sub.Id,
-                        Employees = sub.Component.Department.Employees.Select(e => e.Id).ToList(),
-                    })
+                    s.Id,
+                    Employees = s.Component.Department.Employees.Select(e => e.Id).ToList(),
+                    Groups = s.StudyPlan.Groups.Select(g => g.Id).ToList(),
+                    InstituteAbbr = s.Component.Department.Parent.Abbr ?? s.Component.Department.Abbr
                 })
                 .ToList();
 
-            foreach (var studyPlan in studyPlans)
+            sw.Stop();
+
+            Console.WriteLine($"Query {subjects.Count} subjects with groups and employees. Execution: {sw.ElapsedMilliseconds} ms.");
+
+            sw.Restart();
+
+            var reports = new List<MarkReport>();
+
+            var days = (DateTime.Today - new DateTime(2010, 1, 1)).Days;
+
+            var numbers = subjects
+                .Select(s => s.InstituteAbbr)
+                .Distinct()
+                .ToDictionary(k => k, v => Enumerable.Range(2010, 14).ToDictionary(k => k, v => 0));
+
+            foreach (var subject in subjects)
             {
-                foreach (var group in studyPlan.Groups)
+                foreach (var group in subject.Groups) 
                 {
-                    foreach (var subjects in studyPlan.Subjects)
+                    var reportsCount = Random.Shared.Next(3, 16);
+
+                    for (int i = 0; i < reportsCount; i++) 
                     {
-                        var markReport = new MarkReport
+                        var date = DateTime.Today.AddDays(-1 * Random.Shared.Next(days));
+
+                        var report = new MarkReport
                         {
-                            Date = new DateTime(Random.Shared.Next(2010, 2024), Random.Shared.Next(1, 13), Random.Shared.Next(1, 29)),
                             GroupId = group,
-                            SubjectId = subjects.Id,
-                            EmployeeId = subjects.Employees[Random.Shared.Next(subjects.Employees.Count)],
-                            ReportCode = GenerateReportCode()
+                            SubjectId = subject.Id,
+                            EmployeeId = subject.Employees[Random.Shared.Next(subject.Employees.Count)],
+                            Date = date,
+                            ReportCode = $"{subject.InstituteAbbr}-{++numbers[subject.InstituteAbbr][date.Year]}/{date.Year}"
                         };
 
-                        markReports.Add(markReport);
+                        reports.Add(report);
                     }
                 }
             }
+            sw.Stop();
 
-            _ctx.MarkReport.AddRange(markReports);
+            Console.WriteLine($"Generated {reports.Count} MarkReports. Execution: {sw.ElapsedMilliseconds} ms.");
 
-            _ctx.BulkSaveChanges();
-        }
+            sw.Restart();
 
-        private static string GenerateReportCode()
-        {
-            return null;
+            _ctx.BulkInsert(reports);
+
+            sw.Stop();
+
+            Console.WriteLine($"Inserted {reports.Count} MarkReports. Execution: {sw.ElapsedMilliseconds} ms.");
         }
     }
 }

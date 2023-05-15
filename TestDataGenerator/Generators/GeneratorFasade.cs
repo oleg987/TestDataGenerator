@@ -26,7 +26,7 @@
                 subjectGenerator.Generate();
             }
 
-            using (var markReportGenerator = new AlternativeMarkReportGenerator(_connectionString))
+            using (var markReportGenerator = new MarkReportGenerator(_connectionString))
             {
                 markReportGenerator.Generate();
             }

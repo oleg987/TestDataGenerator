@@ -1,1 +1,1 @@
-Server=localhost;Port=8888;Database=is_data;Username=postgres;Password=123456
+Server=localhost;Port=8888;Database=is_data;Username=postgres;Password=123456;Timeout=300;CommandTimeout=300
