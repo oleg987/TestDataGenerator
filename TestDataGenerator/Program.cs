@@ -22,7 +22,7 @@ namespace TestDataGenerator
 
             var facade = new GeneratorFasade(_connectionString);
 
-
+            facade.Generate();
 
             sw.Stop();
             Console.ForegroundColor = ConsoleColor.Green;
