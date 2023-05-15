@@ -41,7 +41,17 @@ namespace TestDataGenerator.Generators
             foreach (var report in markReports)
             {
                 ++counter;
-                var marksInReport = Random.Shared.Next(1, report.Students.Count);
+
+                int marksInReport = 0;
+
+                if (report.Students.Count == 1)
+                {
+                    marksInReport = 1;
+                }
+                else
+                {
+                    marksInReport = Random.Shared.Next(1, report.Students.Count);
+                }                
 
                 HashSet<int> students = GetRandomStudents(report.Students, marksInReport);
 
@@ -74,6 +84,12 @@ namespace TestDataGenerator.Generators
         private static HashSet<int> GetRandomStudents(List<int> students, int marksInReport)
         {
             var result = new HashSet<int>(marksInReport);
+
+            if (students.Count == 1)
+            {
+                result.Add(students[0]);
+                return result;
+            }
 
             do
             {
